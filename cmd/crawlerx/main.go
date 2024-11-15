@@ -70,188 +70,188 @@ var (
 )
 
 func showBanner() {
-	fmt.Println("\033[1;36m")
-	fmt.Println("  ██████╗██████╗  █████╗ ██╗    ██╗██╗     ███████╗██████╗ ██╗  ██╗ ")
-	fmt.Println(" ██╔════╝██╔══██╗██╔══██╗██║    ██║██║     ██╔════╝██╔══██╗╚██╗██╔╝ ")
-	fmt.Println(" ██║     ██████╔╝███████║██║ █╗ ██║██║     █████╗  ██████╔╝ ╚███╔╝ ")
-	fmt.Println(" ██║     ██╔══██╗██╔══██║██║███╗██║██║     ██╔══╝  ██╔══██╗ ██╔██╗ ")
-	fmt.Println(" ╚██████╗██║  ██║██║  ██║╚███╔███╔╝███████╗███████╗██║  ██║██╔╝ ██╗ ")
-	fmt.Println("  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝ \n")
-	fmt.Println("  Web crawling tool for domains")
-	fmt.Println("  Version 1.0")
-	fmt.Println("  Made by iTrox")
+        fmt.Println("\033[1;36m")
+        fmt.Println("  ██████╗██████╗  █████╗ ██╗    ██╗██╗     ███████╗██████╗ ██╗  ██╗ ")
+        fmt.Println(" ██╔════╝██╔══██╗██╔══██╗██║    ██║██║     ██╔════╝██╔══██╗╚██╗██╔╝ ")
+        fmt.Println(" ██║     ██████╔╝███████║██║ █╗ ██║██║     █████╗  ██████╔╝ ╚███╔╝ ")
+        fmt.Println(" ██║     ██╔══██╗██╔══██║██║███╗██║██║     ██╔══╝  ██╔══██╗ ██╔██╗ ")
+        fmt.Println(" ╚██████╗██║  ██║██║  ██║╚███╔███╔╝███████╗███████╗██║  ██║██╔╝ ██╗ ")
+        fmt.Println("  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝ \n")
+        fmt.Println("  Web crawling tool for domains")
+        fmt.Println("  Version 1.0")
+        fmt.Println("  Made by iTrox")
         fmt.Println("  Website: https://www.itrox.site")
         fmt.Println("  Blog: https://itrox.gitbook.io/itrox\n")
-	fmt.Println("  crawlerx [-h] to view help menu")
-	fmt.Println("\033[0m")
+        fmt.Println("  crawlerx [-h] to view help menu")
+        fmt.Println("\033[0m")
 }
 
 func showUsage() {
-	showBanner()
-	fmt.Println("Usage of Crawlerx:\n")
-	fmt.Println("  -d <domain>              Domain to crawl (e.g., example.com)")
-	fmt.Println("  -o <output file>         Output file")
-	fmt.Println("  -D <depth crawling>      Crawling depth (default: 5, maximum: 10)")
-	fmt.Println("  -H                       Forcing HTTP connection instead of HTTPS\n")
-	// flag.PrintDefaults()
+        showBanner()
+        fmt.Println("Usage of Crawlerx:\n")
+        fmt.Println("  -d <domain>              Domain to crawl (e.g., example.com)")
+        fmt.Println("  -o <output file>         Output file")
+        fmt.Println("  -D <depth crawling>      Crawling depth (default: 5, maximum: 10)")
+        fmt.Println("  -H                       Forcing HTTP connection instead of HTTPS\n")
+        // flag.PrintDefaults()
 }
 
 func randomUserAgent() string {
-	return userAgents[rand.Intn(len(userAgents))]
+        return userAgents[rand.Intn(len(userAgents))]
 }
 
 func writeOutput(output *os.File, text string) {
-	fmt.Println(text)
-	if output != nil {
-		_, err := output.WriteString(text + "\n")
-		if err != nil {
-			log.Fatalf("Error writing to file: %v", err)
-		}
-	}
+        fmt.Println(text)
+        if output != nil {
+                _, err := output.WriteString(text + "\n")
+                if err != nil {
+                        log.Fatalf("Error writing to file: %v", err)
+                }
+        }
 }
 
 func normalizeURL(rawURL string) string {
-	parsedURL, err := url.Parse(rawURL)
-	if err != nil {
-		return rawURL
-	}
+        parsedURL, err := url.Parse(rawURL)
+        if err != nil {
+                return rawURL
+        }
 
-	parsedURL.Fragment = ""
+        parsedURL.Fragment = ""
 
-	if parsedURL.RawQuery != "" {
-		values, _ := url.ParseQuery(parsedURL.RawQuery)
-		parsedURL.RawQuery = values.Encode()
-	}
+        if parsedURL.RawQuery != "" {
+                values, _ := url.ParseQuery(parsedURL.RawQuery)
+                parsedURL.RawQuery = values.Encode()
+        }
 
-	if parsedURL.Path == "" {
-		parsedURL.Path = "/"
-	}
+        if parsedURL.Path == "" {
+                parsedURL.Path = "/"
+        }
 
-	parsedURL.Scheme = strings.ToLower(parsedURL.Scheme)
-	parsedURL.Host = strings.ToLower(parsedURL.Host)
+        parsedURL.Scheme = strings.ToLower(parsedURL.Scheme)
+        parsedURL.Host = strings.ToLower(parsedURL.Host)
 
-	return parsedURL.String()
+        return parsedURL.String()
 }
 
 func setupCrawler(domain string, outputFile string, depth int) {
-	c := colly.NewCollector(
-		colly.MaxDepth(depth),
-		colly.Async(true),
-		colly.AllowedDomains(domain),
-	)
+        c := colly.NewCollector(
+                colly.MaxDepth(depth),
+                colly.Async(true),
+                colly.AllowedDomains(domain),
+        )
 
-	c.UserAgent = randomUserAgent()
+        c.UserAgent = randomUserAgent()
 
-	c.Limit(&colly.LimitRule{
-		DomainGlob:  "*",
-		Parallelism: 2,
-		RandomDelay: 1 * time.Second,
-	})
+        c.Limit(&colly.LimitRule{
+                DomainGlob:  "*",
+                Parallelism: 2,
+                RandomDelay: 1 * time.Second,
+        })
 
-	var output *os.File
-	var err error
-	if outputFile != "" {
-		output, err = os.OpenFile(outputFile, os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			log.Fatalf("Error opening the output file: %v", err)
-		}
-		defer output.Close()
-	}
+        var output *os.File
+        var err error
+        if outputFile != "" {
+                output, err = os.OpenFile(outputFile, os.O_CREATE|os.O_WRONLY, 0644)
+                if err != nil {
+                        log.Fatalf("Error opening the output file: %v", err)
+                }
+                defer output.Close()
+        }
 
-	visitedURLs := make(map[[32]byte]struct{})
-	var mu sync.RWMutex
+        visitedURLs := make(map[[32]byte]struct{})
+        var mu sync.RWMutex
 
-	c.OnRequest(func(r *colly.Request) {
-		if r.Headers.Get("Referer") == "" {
-			r.Headers.Set("Referer", fmt.Sprintf("%s://%s", r.URL.Scheme, r.URL.Host))
-		}
-	})
+        c.OnRequest(func(r *colly.Request) {
+                if r.Headers.Get("Referer") == "" {
+                        r.Headers.Set("Referer", fmt.Sprintf("%s://%s", r.URL.Scheme, r.URL.Host))
+                }
+        })
 
-	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
-		link := e.Attr("href")
-		link = e.Request.AbsoluteURL(link)
-		if strings.HasPrefix(link, "http") {
-			parsedLink, err := url.Parse(link)
-			if err != nil {
-				return
-			}
+        c.OnHTML("a[href]", func(e *colly.HTMLElement) {
+                link := e.Attr("href")
+                link = e.Request.AbsoluteURL(link)
+                if strings.HasPrefix(link, "http") {
+                        parsedLink, err := url.Parse(link)
+                        if err != nil {
+                                return
+                        }
 
-			linkHost := strings.ToLower(parsedLink.Hostname())
-			domainHost := strings.ToLower(domain)
+                        linkHost := strings.ToLower(parsedLink.Hostname())
+                        domainHost := strings.ToLower(domain)
 
-			if linkHost != domainHost {
-				return
-			}
+                        if linkHost != domainHost {
+                                return
+                        }
 
-			normalizedLink := normalizeURL(link)
-			hash := sha256.Sum256([]byte(normalizedLink))
+                        normalizedLink := normalizeURL(link)
+                        hash := sha256.Sum256([]byte(normalizedLink))
 
-			mu.RLock()
-			_, visited := visitedURLs[hash]
-			mu.RUnlock()
+                        mu.RLock()
+                        _, visited := visitedURLs[hash]
+                        mu.RUnlock()
 
-			if !visited {
-				mu.Lock()
-				visitedURLs[hash] = struct{}{}
-				mu.Unlock()
+                        if !visited {
+                                mu.Lock()
+                                visitedURLs[hash] = struct{}{}
+                                mu.Unlock()
 
-				writeOutput(output, normalizedLink)
-				e.Request.Visit(normalizedLink)
-			}
-		}
-	})
+                                writeOutput(output, normalizedLink)
+                                e.Request.Visit(normalizedLink)
+                        }
+                }
+        })
 
-	c.OnError(func(r *colly.Response, err error) {
-		if r != nil && (r.StatusCode == 403 || r.StatusCode == 502) {
-			return
-		}
-		if err != nil && strings.Contains(err.Error(), "connection refused") {
-			return
-		}
-	})
+        c.OnError(func(r *colly.Response, err error) {
+                if r != nil && (r.StatusCode == 403 || r.StatusCode == 502) {
+                        return
+                }
+                if err != nil && strings.Contains(err.Error(), "connection refused") {
+                        return
+                }
+        })
 
-	protocol := "https"
-	if useHTTP {
-		protocol = "http"
-	}
+        protocol := "https"
+        if useHTTP {
+                protocol = "http"
+        }
 
-	startURL := fmt.Sprintf("%s://%s", protocol, domain)
-	normalizedStartURL := normalizeURL(startURL)
-	hash := sha256.Sum256([]byte(normalizedStartURL))
+        startURL := fmt.Sprintf("%s://%s", protocol, domain)
+        normalizedStartURL := normalizeURL(startURL)
+        hash := sha256.Sum256([]byte(normalizedStartURL))
 
-	mu.Lock()
-	visitedURLs[hash] = struct{}{}
-	mu.Unlock()
+        mu.Lock()
+        visitedURLs[hash] = struct{}{}
+        mu.Unlock()
 
-	err = c.Visit(startURL)
-	if err != nil {
-		log.Fatalf("Error starting crawling: %v", err)
-	}
+        err = c.Visit(startURL)
+        if err != nil {
+                log.Fatalf("Error starting crawling: %v", err)
+        }
 
-	c.Wait()
+        c.Wait()
 }
 
 func main() {
-	flag.StringVar(&domain, "d", "", "Domain to crawl")
-	flag.StringVar(&outputFile, "o", "", "Output file")
-	flag.IntVar(&crawlDepth, "D", 5, "Crawling depth")
-	flag.BoolVar(&useHTTP, "H", false, "Forcing HTTP connection instead of HTTPS")
+        flag.StringVar(&domain, "d", "", "Domain to crawl")
+        flag.StringVar(&outputFile, "o", "", "Output file")
+        flag.IntVar(&crawlDepth, "D", 5, "Crawling depth")
+        flag.BoolVar(&useHTTP, "H", false, "Forcing HTTP connection instead of HTTPS")
 
-	flag.Usage = showUsage
+        flag.Usage = showUsage
 
-	flag.Parse()
+        flag.Parse()
 
-	if domain == "" {
-		flag.Usage()
-		return
-	}
+        if domain == "" {
+                flag.Usage()
+                return
+        }
 
-	if crawlDepth > maxDepth {
-		crawlDepth = maxDepth
-	}
+        if crawlDepth > maxDepth {
+                crawlDepth = maxDepth
+        }
 
-	rand.Seed(time.Now().UnixNano())
+        rand.Seed(time.Now().UnixNano())
 
-	showBanner()
-	setupCrawler(domain, outputFile, crawlDepth)
+        showBanner()
+        setupCrawler(domain, outputFile, crawlDepth)
 }
