@@ -80,6 +80,8 @@ func showBanner() {
 	fmt.Println("  Web crawling tool for domains")
 	fmt.Println("  Version 1.0")
 	fmt.Println("  Made by iTrox")
+        fmt.Println("  Website: https://www.itrox.site")
+        fmt.Println("  Blog: https://itrox.gitbook.io/itrox\n")
 	fmt.Println("  crawlerx [-h] to view help menu")
 	fmt.Println("\033[0m")
 }
