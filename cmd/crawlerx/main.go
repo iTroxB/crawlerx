@@ -88,7 +88,7 @@ func showBanner() {
 
 func showUsage() {
 	showBanner()
-	fmt.Println("Usage of Crawlerx:"\n)
+	fmt.Println("Usage of Crawlerx:\n")
 	fmt.Println("  -d <domain>              Domain to crawl (e.g., example.com)")
 	fmt.Println("  -o <output file>         Output file")
 	fmt.Println("  -D <depth crawling>      Crawling depth (default: 5, maximum: 10)")
