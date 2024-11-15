@@ -1,6 +1,6 @@
 # **crawlerx**
 
-![](/img/sub1.png)
+![](/img/crawlerx1.png)
 
 Tool to perform web crawling on sites with https or http protocol.
 
@@ -14,4 +14,4 @@ go install github.com/iTroxB/crawlerx/cmd/crawlerx@latest
 
 - crawlerx -h
 
-![](/img/sub2.png)
+![](/img/crawlerx2.png)
