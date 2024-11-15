@@ -7,7 +7,7 @@ Tool to perform web crawling on sites with https or http protocol.
 ## Install tool
 
 ```shell
-go install github.com/iTroxB/crawlerx/cmd/crawlerx@latest
+go install github.com/itroxb/crawlerx/cmd/crawlerx@latest
 ```
 
 ## Use tool
