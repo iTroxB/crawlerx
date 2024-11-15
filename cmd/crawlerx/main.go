@@ -86,10 +86,10 @@ func showBanner() {
 
 func showUsage() {
         fmt.Println("Uso de Crawlerx:")
-        fmt.Println("  -d <dominio>         Dominio a crawlear (e.g., ejemplo.com)")
-        fmt.Println("  -o <archivo>         Archivo de salida para guardar el contenido")
-        fmt.Println("  -D <profundidad>     Profundidad de crawling (por defecto: 5, máximo: 10)")
-        fmt.Println("  -H                   Forzar conexión HTTP en lugar de HTTPS")
+        fmt.Println("  -d <domain>              Domain to crawl (e.g., example.com)")
+        fmt.Println("  -o <output file>         Output file")
+        fmt.Println("  -D <depth crawling>      Crawling depth (default: 5, maximum: 10)")
+        fmt.Println("  -H                       Forcing HTTP connection instead of HTTPS"\n)
         flag.PrintDefaults()
 }
 
@@ -102,7 +102,7 @@ func writeOutput(output *os.File, text string) {
         if output != nil {
                 _, err := output.WriteString(text + "\n")
                 if err != nil {
-                        log.Fatalf("Error escribiendo en el archivo: %v", err)
+                        log.Fatalf("Error writing to file: %v", err)
                 }
         }
 }
@@ -150,7 +150,7 @@ func setupCrawler(domain string, outputFile string, depth int) {
         if outputFile != "" {
                 output, err = os.OpenFile(outputFile, os.O_CREATE|os.O_WRONLY, 0644)
                 if err != nil {
-                        log.Fatalf("Error al abrir el archivo de salida: %v", err)
+                        log.Fatalf("Error opening the output file: %v", err)
                 }
                 defer output.Close()
         }
@@ -222,18 +222,18 @@ func setupCrawler(domain string, outputFile string, depth int) {
 
         err = c.Visit(startURL)
         if err != nil {
-                log.Fatalf("Error al comenzar el crawling: %v", err)
+                log.Fatalf("Error starting crawling: %v", err)
         }
 
         c.Wait()
 }
 
 func main() {
-        flag.StringVar(&domain, "d", "", "Dominio a crawlear")
-        flag.StringVar(&outputFile, "o", "", "Archivo de salida")
-        flag.IntVar(&crawlDepth, "D", 5, "Profundidad de crawling")
-        flag.BoolVar(&useHTTP, "H", false, "Forzar conexión HTTP")
-        flag.Parse()
+        flag.StringVar(&domain, "d", "", "Domain to crawl")
+        flag.StringVar(&outputFile, "o", "", "Output file")
+        flag.IntVar(&crawlDepth, "D", 5, "Crawling depth")
+        flag.BoolVar(&useHTTP, "H", false, "Forcing HTTP connection instead of HTTPS")
+        flag.Parse()          
 
         if domain == "" {
                 showUsage()
