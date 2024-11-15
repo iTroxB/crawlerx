@@ -1,4 +1,4 @@
-module github.com/itroxb/crawlerx
+module github.com/iTroxB/crawlerx
 
 go 1.23.2
 
