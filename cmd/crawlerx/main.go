@@ -1,26 +1,27 @@
 package main
 
 import (
-        "crypto/sha256"
-        "flag"
-        "fmt"
-        "github.com/gocolly/colly"
-        "log"
-        "math/rand"
-        "net/url"
-        "os"
-        "strings"
-        "sync"
-        "time"
+	"crypto/sha256"
+	"flag"
+	"fmt"
+	"github.com/gocolly/colly"
+	"log"
+	"math/rand"
+	"net/http"
+	"net/url"
+	"os"
+	"strings"
+	"sync"
+	"time"
 )
 
 var (
-        domain     string
-        outputFile string
-        crawlDepth int
-        maxDepth   = 10
-        useHTTP    bool
-        userAgents  = []string{
+	domain     string
+	outputFile string
+	crawlDepth int
+	maxDepth   = 10
+	useHTTP    bool
+	userAgents  = []string{
                 "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; Maxthon 2.0)",
                 "Mozilla/5.0 (Android 11; Mobile; rv:115.0) Gecko/115.0 Firefox/115.0",
                 "Mozilla/5.0 (iPad; CPU OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1",
@@ -70,188 +71,178 @@ var (
 )
 
 func showBanner() {
-        fmt.Println("\033[1;36m")
-        fmt.Println("  ██████╗██████╗  █████╗ ██╗    ██╗██╗     ███████╗██████╗ ██╗  ██╗ ")
-        fmt.Println(" ██╔════╝██╔══██╗██╔══██╗██║    ██║██║     ██╔════╝██╔══██╗╚██╗██╔╝ ")
-        fmt.Println(" ██║     ██████╔╝███████║██║ █╗ ██║██║     █████╗  ██████╔╝ ╚███╔╝ ")
-        fmt.Println(" ██║     ██╔══██╗██╔══██║██║███╗██║██║     ██╔══╝  ██╔══██╗ ██╔██╗ ")
-        fmt.Println(" ╚██████╗██║  ██║██║  ██║╚███╔███╔╝███████╗███████╗██║  ██║██╔╝ ██╗ ")
-        fmt.Println("  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝ \n")
-        fmt.Println("  Web crawling tool for domains")
-        fmt.Println("  Version 1.0")
-        fmt.Println("  Made by iTrox")
-        fmt.Println("  Website: https://www.itrox.site")
-        fmt.Println("  Blog: https://itrox.gitbook.io/itrox\n")
-        fmt.Println("  crawlerx [-h] to view help menu")
-        fmt.Println("\033[0m")
-}
-
-func showUsage() {
-        showBanner()
-        fmt.Println("Usage of Crawlerx:\n")
-        fmt.Println("  -d <domain>              Domain to crawl (e.g., example.com)")
-        fmt.Println("  -o <output file>         Output file")
-        fmt.Println("  -D <depth crawling>      Crawling depth (default: 5, maximum: 10)")
-        fmt.Println("  -H                       Forcing HTTP connection instead of HTTPS\n")
-        // flag.PrintDefaults()
+	fmt.Println("\033[1;36m")
+	fmt.Println("  ██████╗██████╗  █████╗ ██╗    ██╗██╗     ███████╗██████╗ ██╗  ██╗ ")
+	fmt.Println(" ██╔════╝██╔══██╗██╔══██╗██║    ██║██║     ██╔════╝██╔══██╗╚██╗██╔╝ ")
+	fmt.Println(" ██║     ██████╔╝███████║██║ █╗ ██║██║     █████╗  ██████╔╝ ╚███╔╝ ")
+	fmt.Println(" ██║     ██╔══██╗██╔══██║██║███╗██║██║     ██╔══╝  ██╔══██╗ ██╔██╗ ")
+	fmt.Println(" ╚██████╗██║  ██║██║  ██║╚███╔███╔╝███████╗███████╗██║  ██║██╔╝ ██╗ ")
+	fmt.Println("  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝ \n")
+	fmt.Println("  Web crawling tool for domains")
+	fmt.Println("  Version 1.2 - Final")
+	fmt.Println("\033[0m")
 }
 
 func randomUserAgent() string {
-        return userAgents[rand.Intn(len(userAgents))]
-}
-
-func writeOutput(output *os.File, text string) {
-        fmt.Println(text)
-        if output != nil {
-                _, err := output.WriteString(text + "\n")
-                if err != nil {
-                        log.Fatalf("Error writing to file: %v", err)
-                }
-        }
+	return userAgents[rand.Intn(len(userAgents))]
 }
 
 func normalizeURL(rawURL string) string {
-        parsedURL, err := url.Parse(rawURL)
-        if err != nil {
-                return rawURL
-        }
+	parsedURL, err := url.Parse(rawURL)
+	if err != nil {
+		return rawURL
+	}
 
-        parsedURL.Fragment = ""
+	parsedURL.Fragment = ""
 
-        if parsedURL.RawQuery != "" {
-                values, _ := url.ParseQuery(parsedURL.RawQuery)
-                parsedURL.RawQuery = values.Encode()
-        }
+	if parsedURL.Path == "" {
+		parsedURL.Path = "/"
+	}
 
-        if parsedURL.Path == "" {
-                parsedURL.Path = "/"
-        }
+	return parsedURL.String()
+}
 
-        parsedURL.Scheme = strings.ToLower(parsedURL.Scheme)
-        parsedURL.Host = strings.ToLower(parsedURL.Host)
+func detectFinalDomain(initialDomain string) string {
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return nil
+		},
+	}
 
-        return parsedURL.String()
+	protocol := "https"
+	if useHTTP {
+		protocol = "http"
+	}
+
+	startURL := fmt.Sprintf("%s://%s", protocol, initialDomain)
+	resp, err := client.Get(startURL)
+	if err != nil {
+		log.Printf("Error detecting final domain: %v", err)
+		return initialDomain
+	}
+	defer resp.Body.Close()
+
+	finalURL := resp.Request.URL.String()
+	parsedURL, err := url.Parse(finalURL)
+	if err != nil {
+		log.Printf("Error parsing final URL: %v", err)
+		return initialDomain
+	}
+
+	finalDomain := parsedURL.Hostname()
+	log.Printf("Final domain detected: %s", finalDomain)
+	return finalDomain
 }
 
 func setupCrawler(domain string, outputFile string, depth int) {
-        c := colly.NewCollector(
-                colly.MaxDepth(depth),
-                colly.Async(true),
-                colly.AllowedDomains(domain),
-        )
+	finalDomain := detectFinalDomain(domain)
 
-        c.UserAgent = randomUserAgent()
+	c := colly.NewCollector(
+		colly.MaxDepth(depth),
+		colly.Async(true),
+		colly.AllowedDomains(finalDomain, "www."+finalDomain),
+	)
 
-        c.Limit(&colly.LimitRule{
-                DomainGlob:  "*",
-                Parallelism: 2,
-                RandomDelay: 1 * time.Second,
-        })
+	c.UserAgent = randomUserAgent()
 
-        var output *os.File
-        var err error
-        if outputFile != "" {
-                output, err = os.OpenFile(outputFile, os.O_CREATE|os.O_WRONLY, 0644)
-                if err != nil {
-                        log.Fatalf("Error opening the output file: %v", err)
-                }
-                defer output.Close()
-        }
+	c.Limit(&colly.LimitRule{
+		DomainGlob:  "*",
+		Parallelism: 2,
+		RandomDelay: 3 * time.Second,
+	})
 
-        visitedURLs := make(map[[32]byte]struct{})
-        var mu sync.RWMutex
+	var output *os.File
+	var err error
+	if outputFile != "" {
+		output, err = os.Create(outputFile)
+		if err != nil {
+			log.Fatalf("Error creating the output file: %v", err)
+		}
+		defer output.Close()
+	}
 
-        c.OnRequest(func(r *colly.Request) {
-                if r.Headers.Get("Referer") == "" {
-                        r.Headers.Set("Referer", fmt.Sprintf("%s://%s", r.URL.Scheme, r.URL.Host))
-                }
-        })
+	visitedURLs := make(map[[32]byte]struct{})
+	var mu sync.RWMutex
 
-        c.OnHTML("a[href]", func(e *colly.HTMLElement) {
-                link := e.Attr("href")
-                link = e.Request.AbsoluteURL(link)
-                if strings.HasPrefix(link, "http") {
-                        parsedLink, err := url.Parse(link)
-                        if err != nil {
-                                return
-                        }
+	c.OnRequest(func(r *colly.Request) {
+		log.Printf("Visiting: %s", r.URL.String())
+	})
 
-                        linkHost := strings.ToLower(parsedLink.Hostname())
-                        domainHost := strings.ToLower(domain)
+	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
+		link := e.Attr("href")
+		link = e.Request.AbsoluteURL(link)
+		if strings.HasPrefix(link, "http") {
+			parsedLink, err := url.Parse(link)
+			if err != nil {
+				return
+			}
 
-                        if linkHost != domainHost {
-                                return
-                        }
+			linkHost := strings.ToLower(parsedLink.Hostname())
+			if !strings.HasSuffix(linkHost, finalDomain) {
+				return
+			}
 
-                        normalizedLink := normalizeURL(link)
-                        hash := sha256.Sum256([]byte(normalizedLink))
+			normalizedLink := normalizeURL(link)
+			hash := sha256.Sum256([]byte(normalizedLink))
 
-                        mu.RLock()
-                        _, visited := visitedURLs[hash]
-                        mu.RUnlock()
+			mu.RLock()
+			_, visited := visitedURLs[hash]
+			mu.RUnlock()
 
-                        if !visited {
-                                mu.Lock()
-                                visitedURLs[hash] = struct{}{}
-                                mu.Unlock()
+			if !visited {
+				mu.Lock()
+				visitedURLs[hash] = struct{}{}
+				mu.Unlock()
 
-                                writeOutput(output, normalizedLink)
-                                e.Request.Visit(normalizedLink)
-                        }
-                }
-        })
+				log.Printf("Discovered: %s", normalizedLink)
+				if output != nil {
+					_, err := output.WriteString(normalizedLink + "\n")
+					if err != nil {
+						log.Fatalf("Error writing to file: %v", err)
+					}
+				}
+				e.Request.Visit(normalizedLink)
+			}
+		}
+	})
 
-        c.OnError(func(r *colly.Response, err error) {
-                if r != nil && (r.StatusCode == 403 || r.StatusCode == 502) {
-                        return
-                }
-                if err != nil && strings.Contains(err.Error(), "connection refused") {
-                        return
-                }
-        })
+	c.OnError(func(r *colly.Response, err error) {
+		log.Printf("Error on %s: %v, StatusCode: %d", r.Request.URL, err, r.StatusCode)
+	})
 
-        protocol := "https"
-        if useHTTP {
-                protocol = "http"
-        }
+	protocol := "https"
+	if useHTTP {
+		protocol = "http"
+	}
 
-        startURL := fmt.Sprintf("%s://%s", protocol, domain)
-        normalizedStartURL := normalizeURL(startURL)
-        hash := sha256.Sum256([]byte(normalizedStartURL))
+	startURL := fmt.Sprintf("%s://%s", protocol, domain)
+	err = c.Visit(startURL)
+	if err != nil {
+		log.Fatalf("Error starting crawling: %v", err)
+	}
 
-        mu.Lock()
-        visitedURLs[hash] = struct{}{}
-        mu.Unlock()
-
-        err = c.Visit(startURL)
-        if err != nil {
-                log.Fatalf("Error starting crawling: %v", err)
-        }
-
-        c.Wait()
+	c.Wait()
 }
 
 func main() {
-        flag.StringVar(&domain, "d", "", "Domain to crawl")
-        flag.StringVar(&outputFile, "o", "", "Output file")
-        flag.IntVar(&crawlDepth, "D", 5, "Crawling depth")
-        flag.BoolVar(&useHTTP, "H", false, "Forcing HTTP connection instead of HTTPS")
+	flag.StringVar(&domain, "d", "", "Domain to crawl")
+	flag.StringVar(&outputFile, "o", "", "Output file")
+	flag.IntVar(&crawlDepth, "D", 5, "Crawling depth")
+	flag.BoolVar(&useHTTP, "H", false, "Forcing HTTP connection instead of HTTPS")
 
-        flag.Usage = showUsage
+	flag.Parse()
 
-        flag.Parse()
+	if domain == "" {
+		log.Println("Domain is required. Use -d <domain> to specify.")
+		return
+	}
 
-        if domain == "" {
-                flag.Usage()
-                return
-        }
+	if crawlDepth > maxDepth {
+		crawlDepth = maxDepth
+	}
 
-        if crawlDepth > maxDepth {
-                crawlDepth = maxDepth
-        }
+	rand.Seed(time.Now().UnixNano())
 
-        rand.Seed(time.Now().UnixNano())
-
-        showBanner()
-        setupCrawler(domain, outputFile, crawlDepth)
+	showBanner()
+	setupCrawler(domain, outputFile, crawlDepth)
 }
